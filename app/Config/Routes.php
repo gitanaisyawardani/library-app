@@ -1,17 +1,19 @@
 <?php
 
-namespace Config;
+use CodeIgniter\Router\RouteCollection;
 
-use CodeIgniter\Config\Services;
+/**
+ * @var RouteCollection $routes
+ */
 
-$routes = Services::routes();
-
-// Default route (biar / langsung ke books)
 $routes->get('/', 'BookController::index');
 
 // Books
 $routes->get('books', 'BookController::index');
 $routes->get('books/(:num)', 'BookController::detail/$1');
+
+// Search Books Online
+$routes->get('search-books', 'BookController::searchOnline');
 
 // Members
 $routes->get('members', 'MemberController::index');

@@ -39,4 +39,52 @@ class BookController extends BaseController
             'error' => $result['error'] ?? null,
         ]);
     }
+
+    // Cari buku online dari Open Library API
+    public function searchOnline(): string
+    {
+        $keyword = trim((string) $this->request->getGet('q'));
+        $category = trim((string) $this->request->getGet('category'));
+
+        $books = [];
+        $error = null;
+
+        if ($keyword !== '' || $category !== '') {
+            $queryParts = [];
+
+            if ($keyword !== '') {
+                $queryParts[] = $keyword;
+            }
+
+            if ($category !== '') {
+                $queryParts[] = $category;
+            }
+
+            $finalQuery = implode(' ', $queryParts);
+            $url = 'https://openlibrary.org/search.json?q=' . urlencode($finalQuery);
+
+            $response = @file_get_contents($url);
+
+            if ($response === false) {
+                $error = 'Gagal mengambil data dari Open Library API.';
+            } else {
+                $data = json_decode($response, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $error = 'Response API tidak valid.';
+                } else {
+                    $books = $data['docs'] ?? [];
+                    $books = array_slice($books, 0, 12);
+                }
+            }
+        }
+
+        return view('books/search_online', [
+            'title' => 'Cari Buku Online',
+            'keyword' => $keyword,
+            'category' => $category,
+            'books' => $books,
+            'error' => $error,
+        ]);
+    }
 }
